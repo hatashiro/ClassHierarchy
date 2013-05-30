@@ -1,0 +1,20 @@
+[
+    {
+        "caption": "CTagsHierarchy: Rebuild Hierarchy",
+        "command": "rebuild_hierarchy"
+    },
+    {
+        "caption": "CTagsHierarchy: Show Upward Hierarchy",
+        "command": "show_upward_hierarchy",
+        "args": {
+            "no_symbol": true
+        }
+    },
+    {
+        "caption": "CTagsHierarchy: Show Downward Hierarchy",
+        "command": "show_downward_hierarchy",
+        "args": {
+            "no_symbol": true
+        }
+    }
+]
