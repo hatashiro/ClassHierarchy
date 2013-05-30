@@ -5,7 +5,7 @@ from ClassHierarchyManager import ClassHierarchyManager, set_tab_size, NoSymbolE
 from helpers import get_symbol
 from settings import setting
 
-ctags_hierarchy_command = setting('command')
+class_hierarchy_ctags_command = setting('ctags_command')
 
 class_hierarchy_manager = ClassHierarchyManager()
 set_tab_size(setting('tab_size'))

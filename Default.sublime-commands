@@ -1,17 +1,17 @@
 [
     {
-        "caption": "CTagsHierarchy: Rebuild Hierarchy",
+        "caption": "ClassHierarchy: Re/Build Hierarchy",
         "command": "rebuild_hierarchy"
     },
     {
-        "caption": "CTagsHierarchy: Show Upward Hierarchy",
+        "caption": "ClassHierarchy: Show Upward Hierarchy",
         "command": "show_upward_hierarchy",
         "args": {
             "no_symbol": true
         }
     },
     {
-        "caption": "CTagsHierarchy: Show Downward Hierarchy",
+        "caption": "ClassHierarchy: Show Downward Hierarchy",
         "command": "show_downward_hierarchy",
         "args": {
             "no_symbol": true

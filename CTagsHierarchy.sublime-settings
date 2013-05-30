@@ -1,4 +1,0 @@
-{
-    "command": "ctags -R --fields=+i-afkKlmnsSzt -f",
-    "tab_size": 4
-}
