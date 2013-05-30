@@ -18,15 +18,21 @@ class RebuildHierarchy(sublime_plugin.TextCommand):
 class ShowUpwardHierarchy(sublime_plugin.TextCommand):
     @get_symbol
     def run(self, edit, view, symbol):
-        try:
-            class_hierarchy_manager.show_upward_hierarchy(symbol)
-        except NoSymbolException:
-            sublime.status_message("Can't find \"%s\"." % symbol)
+        if symbol:
+            try:
+                class_hierarchy_manager.show_upward_hierarchy(symbol)
+            except NoSymbolException:
+                sublime.status_message("Can't find \"%s\"." % symbol)
+        else:
+            print "Symbol None" # FIXME
 
 class ShowDownwardHierarchy(sublime_plugin.TextCommand):
     @get_symbol
     def run(self, edit, view, symbol):
-        try:
-            class_hierarchy_manager.show_downward_hierarchy(symbol)
-        except NoSymbolException:
-            sublime.status_message("Can't find \"%s\"." % symbol)
+        if symbol:
+            try:
+                class_hierarchy_manager.show_downward_hierarchy(symbol)
+            except NoSymbolException:
+                sublime.status_message("Can't find \"%s\"." % symbol)
+        else:
+            print "Symbol None" # FIXME
