@@ -85,7 +85,19 @@ class ReloadHierarchyTreeThread(threading.Thread):
         is_hierarchy_tree_in_loading = False
 
 class ReloadHierarchyTree(sublime_plugin.TextCommand):
+    def ctags_file_path(self):
+        ctags_file_path = os.path.join(self.view.window().folders()[0], setting('ctags_file'))
+        if os.path.isfile(ctags_file_path):
+            return ctags_file_path
+        else:
+            return None
+
     def run(self, edit, caller=None):
+        ctags_file_path = self.ctags_file_path()
+        if not ctags_file_path:
+            sublime.status_message("There's no ctags file for ClassHierarchy. Please check the settings or build the file with 'rebuild_hierarchy_ctags' command.")
+            return
+
         global is_hierarchy_tree_in_loading, is_hierarchy_tree_loaded
 
         if is_busy():
@@ -94,7 +106,7 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         is_hierarchy_tree_in_loading = True
         is_hierarchy_tree_loaded = False
         sublime.status_message("Re/Loading hierarchy tree... Please be patient.")
-        thread = ReloadHierarchyTreeThread('/Users/junhyunje/Studies/class-hierarchy/tags-hierarchy') # FIXME
+        thread = ReloadHierarchyTreeThread(ctags_file_path)
 
         if caller:
             did_finished = lambda: self.view.run_command(to_underscore(caller))
