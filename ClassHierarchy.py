@@ -23,6 +23,17 @@ def check_if_thread_finished(thread, did_finished):
     else:
         did_finished()
 
+def is_busy():
+    global is_hierarchy_ctags_in_building, is_hierarchy_tree_in_loading
+
+    if is_hierarchy_ctags_in_building:
+        sublime.status_message("Now re/building hierarchy ctags... Please be patient.")
+        return True
+    if is_hierarchy_tree_in_loading:
+        sublime.status_message("Now re/loading hierarchy tree... Please be patient.")
+        return True
+    return False
+
 class RebuildHierarchyCtagsThread(threading.Thread):
     def __init__(self, ctags_command, ctags_file, project_dir):
         threading.Thread.__init__(self)
@@ -48,8 +59,7 @@ class RebuildHierarchyCtags(sublime_plugin.TextCommand):
     def run(self, edit):
         global is_hierarchy_ctags_in_building
 
-        if is_hierarchy_ctags_in_building:
-            sublime.status_message("Now re/building hierarchy ctags... Please be patient.")
+        if is_busy():
             return
 
         is_hierarchy_ctags_in_building = True
@@ -77,8 +87,7 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
     def run(self, edit, caller=None):
         global is_hierarchy_tree_in_loading, is_hierarchy_tree_loaded
 
-        if is_hierarchy_tree_in_loading:
-            sublime.status_message("Now re/loading hierarchy tree... Please be patient.")
+        if is_busy():
             return
 
         is_hierarchy_tree_in_loading = True
