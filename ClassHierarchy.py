@@ -57,24 +57,28 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         thread.start()
         sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500);
 
-class ShowUpwardHierarchy(sublime_plugin.TextCommand):
+class ShowHierarchyBase(sublime_plugin.TextCommand):
     @get_symbol
     def run(self, edit, view, symbol):
-        if symbol:
-            try:
-                class_hierarchy_manager.show_upward_hierarchy(symbol)
-            except NoSymbolException:
-                sublime.status_message("Can't find \"%s\"." % symbol)
-        else:
-            print "Symbol None" # FIXME
+        global is_hierarchy_tree_loaded
 
-class ShowDownwardHierarchy(sublime_plugin.TextCommand):
-    @get_symbol
-    def run(self, edit, view, symbol):
-        if symbol:
-            try:
-                class_hierarchy_manager.show_downward_hierarchy(symbol)
-            except NoSymbolException:
-                sublime.status_message("Can't find \"%s\"." % symbol)
+        if is_hierarchy_tree_loaded:
+            if symbol:
+                try:
+                    self.hierarchy_function(symbol)
+                except NoSymbolException:
+                    sublime.status_message("Can't find \"%s\"." % symbol)
+            else:
+                print "Symbol None" # FIXME
         else:
-            print "Symbol None" # FIXME
+            view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__})
+
+class ShowUpwardHierarchy(ShowHierarchyBase):
+    def __init__(self, args):
+        sublime_plugin.TextCommand.__init__(self, args)
+        self.hierarchy_function = class_hierarchy_manager.show_upward_hierarchy
+
+class ShowDownwardHierarchy(ShowHierarchyBase):
+    def __init__(self, args):
+        sublime_plugin.TextCommand.__init__(self, args)
+        self.hierarchy_function = class_hierarchy_manager.show_downward_hierarchy
