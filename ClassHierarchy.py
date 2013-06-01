@@ -57,12 +57,13 @@ class RebuildHierarchyCtagsThread(threading.Thread):
 
 class RebuildHierarchyCtags(sublime_plugin.TextCommand):
     def run(self, edit):
-        global is_hierarchy_ctags_in_building
+        global is_hierarchy_ctags_in_building, is_hierarchy_tree_loaded
 
         if is_busy():
             return
 
         is_hierarchy_ctags_in_building = True
+        is_hierarchy_tree_loaded = False
         sublime.status_message("Re/Building hierarchy ctags... Please be patient.")
         thread = RebuildHierarchyCtagsThread(setting('ctags_command'), setting('ctags_file'), self.view.window().folders()[0])
 
