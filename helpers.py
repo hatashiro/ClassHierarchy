@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import re
 from functools import wraps
 
 def get_symbol(f):
@@ -16,3 +17,7 @@ def get_symbol(f):
 
         return f(self, edit, view, symbol)
     return wrapper
+
+def to_underscore(camelcase):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', camelcase)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
