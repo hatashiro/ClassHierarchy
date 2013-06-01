@@ -19,9 +19,9 @@ is_hierarchy_tree_loaded = False
 
 def check_if_thread_finished(thread, did_finished):
     if thread.is_alive():
-        sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500);
+        sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500)
     else:
-        did_finished();
+        did_finished()
 
 class RebuildHierarchyCtagsThread(threading.Thread):
     def __init__(self, ctags_command, ctags_file, project_dir):
@@ -92,7 +92,7 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
             did_finished = lambda: sublime.status_message("Re/Loading hierarchy tree is finished!")
 
         thread.start()
-        sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500);
+        sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500)
 
 class ShowHierarchyBase(sublime_plugin.TextCommand):
     @get_symbol
