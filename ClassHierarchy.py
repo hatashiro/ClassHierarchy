@@ -1,15 +1,18 @@
 # -*- encoding: utf-8 -*-
 import threading
 import sublime, sublime_plugin
+import os
+import re
+import subprocess
 
 from ClassHierarchyManager import ClassHierarchyManager, set_tab_size, NoSymbolException
 from helpers import get_symbol, to_underscore
 from settings import setting
 
-class_hierarchy_ctags_command = setting('ctags_command')
-
 class_hierarchy_manager = ClassHierarchyManager()
 set_tab_size(setting('tab_size'))
+
+is_hierarchy_ctags_in_building = False
 
 is_hierarchy_tree_in_loading = False
 is_hierarchy_tree_loaded = False
@@ -20,9 +23,43 @@ def check_if_thread_finished(thread, did_finished):
     else:
         did_finished();
 
+class RebuildHierarchyCtagsThread(threading.Thread):
+    def __init__(self, ctags_command, ctags_file, project_dir):
+        threading.Thread.__init__(self)
+        self.ctags_command = ctags_command
+        self.ctags_file = ctags_file
+        self.project_dir = project_dir
+
+    def run(self):
+        global is_hierarchy_ctags_in_building
+
+        ctags_command = self.ctags_command
+
+        # Replace -f arg with the path from setting
+        ctags_command = re.sub(" -f *[^ ]+", "", ctags_command)
+        ctags_command += " -f %s" % self.ctags_file
+
+        p = subprocess.Popen(ctags_command, cwd=self.project_dir, shell=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p.wait()
+
+        is_hierarchy_ctags_in_building = False
+
 class RebuildHierarchyCtags(sublime_plugin.TextCommand):
     def run(self, edit):
-        sublime.status_message("Re/Building ctags for hierarchy... Please be patient.")
+        global is_hierarchy_ctags_in_building
+
+        if is_hierarchy_ctags_in_building:
+            sublime.status_message("Now re/building hierarchy ctags... Please be patient.")
+            return
+
+        is_hierarchy_ctags_in_building = True
+        sublime.status_message("Re/Building hierarchy ctags... Please be patient.")
+        thread = RebuildHierarchyCtagsThread(setting('ctags_command'), setting('ctags_file'), self.view.window().folders()[0])
+
+        did_finished = lambda: self.view.run_command('reload_hierarchy_tree')
+
+        thread.start()
+        sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500)
 
 class ReloadHierarchyTreeThread(threading.Thread):
     def __init__(self, ctags_file_path):

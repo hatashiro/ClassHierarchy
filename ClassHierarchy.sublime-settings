@@ -1,4 +1,5 @@
 {
-    "ctags_command": "ctags -R --fields=+i-afkKlmnsSzt -f",
+    "ctags_command": "ctags -R --fields=+i-afkKlmnsSzt",
+    "ctags_file": ".tags-hierarchy",
     "tab_size": 4
 }
