@@ -135,9 +135,9 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
 class ShowUpwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
-        self.hierarchy_function = class_hierarchy_manager.show_upward_hierarchy
+        self.hierarchy_function = class_hierarchy_manager.get_upward_hierarchy
 
 class ShowDownwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
-        self.hierarchy_function = class_hierarchy_manager.show_downward_hierarchy
+        self.hierarchy_function = class_hierarchy_manager.get_downward_hierarchy

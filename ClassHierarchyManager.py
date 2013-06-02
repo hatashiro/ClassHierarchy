@@ -22,26 +22,27 @@ class Class(object):
     def add_filepath(self, path):
         self.filepaths.add(path)
 
-    def show_info(self, indent=''):
-        print indent + self.name
+    def get_info(self, indent=''):
+        result = indent + self.name
         for filepath in self.filepaths:
-            print indent + '|' + filepath
+            result += "\n" + indent + '|' + filepath
+        return result
 
-    def show_upward_hierarchy(self, indent=''):
-        self.show_info(indent)
+    def get_upward_hierarchy(self, indent=''):
+        result = self.get_info(indent)
 
-        if len(self.parents) == 0:
-            return
         for parent in sorted(self.parents, key=lambda cls: cls.name):
-            parent.show_upward_hierarchy(indent + ' ' * tab_size)
+            result += "\n" + parent.get_upward_hierarchy(indent + ' ' * tab_size)
 
-    def show_downward_hierarchy(self, indent=''):
-        self.show_info(indent)
+        return result
 
-        if len(self.childs) == 0:
-            return
+    def get_downward_hierarchy(self, indent=''):
+        result = self.get_info(indent)
+
         for child in sorted(self.childs, key=lambda cls: cls.name):
-            child.show_downward_hierarchy(indent + ' ' * tab_size)
+            result += "\n" + child.get_downward_hierarchy(indent + ' ' * tab_size)
+
+        return result
 
 class ClassHierarchyManager(object):
     def __init__(self):
@@ -76,16 +77,16 @@ class ClassHierarchyManager(object):
                     for parent in parents:
                         cls.inherits(self.get_class(parent))
 
-    def show_upward_hierarchy(self, symbol):
+    def get_upward_hierarchy(self, symbol):
         try:
             cls = self.class_pool[symbol]
         except KeyError:
             raise NoSymbolException
-        cls.show_upward_hierarchy()
+        return cls.get_upward_hierarchy()
 
-    def show_downward_hierarchy(self, symbol):
+    def get_downward_hierarchy(self, symbol):
         try:
             cls = self.class_pool[symbol]
         except KeyError:
             raise NoSymbolException
-        cls.show_downward_hierarchy()
+        return cls.get_downward_hierarchy()
