@@ -32,7 +32,7 @@ class Class(object):
 
         if len(self.parents) == 0:
             return
-        for parent in sorted(self.parents):
+        for parent in sorted(self.parents, key=lambda cls: cls.name):
             parent.show_upward_hierarchy(indent + ' ' * tab_size)
 
     def show_downward_hierarchy(self, indent=''):
@@ -40,7 +40,7 @@ class Class(object):
 
         if len(self.childs) == 0:
             return
-        for child in sorted(self.childs):
+        for child in sorted(self.childs, key=lambda cls: cls.name):
             child.show_downward_hierarchy(indent + ' ' * tab_size)
 
 class ClassHierarchyManager(object):
