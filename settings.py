@@ -1,6 +1,9 @@
 # -*- encoding: utf-8 -*-
 import sublime
 
+class NoSettingException(Exception):
+    pass
+
 def get_setting(settings, key):
     if settings.has(key):
         return settings.get(key)
@@ -22,7 +25,7 @@ def get_setting_from_plugin(key):
     settings = sublime.load_settings("ClassHierarchy.sublime-settings")
     return get_setting(settings, key)
 
-def setting(key, default=None, view=None):
+def setting(key, view=None):
     value = get_setting_from_view(key)
     if value:
         return value
@@ -34,3 +37,6 @@ def setting(key, default=None, view=None):
     value = get_setting_from_plugin(key)
     if value:
         return value
+
+    sublime.status_message('"%s" is not found in settings. Please check the setting or restart Sublime Text.' % key)
+    raise NoSettingException
