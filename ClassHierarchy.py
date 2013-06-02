@@ -7,6 +7,7 @@ import subprocess
 
 from ClassHierarchyManager import ClassHierarchyManager, set_tab_size, NoSymbolException
 from helpers import get_symbol, to_underscore
+from HierarchyView import HierarchyView
 from settings import setting
 
 class_hierarchy_manager = ClassHierarchyManager()
@@ -123,21 +124,29 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
 
         if is_hierarchy_tree_loaded:
             if symbol:
-                try:
-                    self.hierarchy_function(symbol)
-                except NoSymbolException:
-                    sublime.status_message("Can't find \"%s\"." % symbol)
+                self.show_hierarchy(symbol)
             else:
                 print "Symbol None" # FIXME
         else:
             view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__})
 
+    def show_hierarchy(self, symbol):
+        try:
+            result = self.hierarchy_function(symbol)
+            view_name = self.view_name + ': ' + symbol
+            hierarchy_view = HierarchyView(view_name)
+            hierarchy_view.set_content(result)
+        except NoSymbolException:
+            sublime.status_message("Can't find \"%s\"." % symbol)
+
 class ShowUpwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
         self.hierarchy_function = class_hierarchy_manager.get_upward_hierarchy
+        self.view_name = "Upward Hierarchy"
 
 class ShowDownwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
         self.hierarchy_function = class_hierarchy_manager.get_downward_hierarchy
+        self.view_name = "Downward Hierarchy"
