@@ -10,13 +10,24 @@ from helpers import get_symbol, to_underscore
 from HierarchyView import HierarchyView
 from settings import setting
 
-class_hierarchy_manager = ClassHierarchyManager()
 set_tab_size(setting('tab_size'))
 
 is_hierarchy_ctags_in_building = False
-
 is_hierarchy_tree_in_loading = False
-is_hierarchy_tree_loaded = False
+
+hierarchy_tree_pool = dict()
+def get_hierarchy_tree(project_dir):
+    try:
+        return hierarchy_tree_pool[project_dir]
+    except KeyError:
+        return None
+
+def load_hierarchy_tree(project_dir, ctags_file_path):
+    hierarchy_tree_pool[project_dir] = ClassHierarchyManager()
+    hierarchy_tree_pool[project_dir].parse_tags_file(ctags_file_path)
+
+def unload_hierarchy_tree(project_dir):
+    hierarchy_tree_pool[project_dir] = None
 
 def check_if_thread_finished(thread, did_finished):
     if thread.is_alive():
@@ -58,15 +69,17 @@ class RebuildHierarchyCtagsThread(threading.Thread):
 
 class RebuildHierarchyCtags(sublime_plugin.TextCommand):
     def run(self, edit):
-        global is_hierarchy_ctags_in_building, is_hierarchy_tree_loaded
+        global is_hierarchy_ctags_in_building
 
         if is_busy():
             return
 
         is_hierarchy_ctags_in_building = True
-        is_hierarchy_tree_loaded = False
+
+        project_dir = self.view.window().folders()[0]
+        unload_hierarchy_tree(project_dir)
         sublime.status_message("Re/Building hierarchy ctags... Please be patient.")
-        thread = RebuildHierarchyCtagsThread(setting('ctags_command'), setting('ctags_file'), self.view.window().folders()[0])
+        thread = RebuildHierarchyCtagsThread(setting('ctags_command'), setting('ctags_file'), project_dir)
 
         did_finished = lambda: self.view.run_command('reload_hierarchy_tree')
 
@@ -74,40 +87,37 @@ class RebuildHierarchyCtags(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500)
 
 class ReloadHierarchyTreeThread(threading.Thread):
-    def __init__(self, ctags_file_path):
+    def __init__(self, project_dir, ctags_file_path):
         threading.Thread.__init__(self)
+        self.project_dir = project_dir
         self.ctags_file_path = ctags_file_path
 
     def run(self):
-        global is_hierarchy_tree_in_loading, is_hierarchy_tree_loaded
+        global is_hierarchy_tree_in_loading
 
-        class_hierarchy_manager.parse_tags_file(self.ctags_file_path)
-        is_hierarchy_tree_loaded = True
+        load_hierarchy_tree(self.project_dir, self.ctags_file_path)
+
         is_hierarchy_tree_in_loading = False
 
 class ReloadHierarchyTree(sublime_plugin.TextCommand):
-    def ctags_file_path(self):
-        ctags_file_path = os.path.join(self.view.window().folders()[0], setting('ctags_file'))
-        if os.path.isfile(ctags_file_path):
-            return ctags_file_path
-        else:
-            return None
-
     def run(self, edit, caller=None):
-        ctags_file_path = self.ctags_file_path()
-        if not ctags_file_path:
+        project_dir = self.view.window().folders()[0]
+        ctags_file_path = os.path.join(project_dir, setting('ctags_file'))
+
+        if not os.path.isfile(ctags_file_path):
             sublime.status_message("There's no ctags file for ClassHierarchy. Please check the settings or build the file with 'rebuild_hierarchy_ctags' command.")
             return
 
-        global is_hierarchy_tree_in_loading, is_hierarchy_tree_loaded
+        global is_hierarchy_tree_in_loading
 
         if is_busy():
             return
 
         is_hierarchy_tree_in_loading = True
-        is_hierarchy_tree_loaded = False
+
+        unload_hierarchy_tree(project_dir)
         sublime.status_message("Re/Loading hierarchy tree... Please be patient.")
-        thread = ReloadHierarchyTreeThread(ctags_file_path)
+        thread = ReloadHierarchyTreeThread(project_dir, ctags_file_path)
 
         if caller:
             did_finished = lambda: self.view.run_command(to_underscore(caller))
@@ -120,19 +130,20 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
 class ShowHierarchyBase(sublime_plugin.TextCommand):
     @get_symbol
     def run(self, edit, view, symbol):
-        global is_hierarchy_tree_loaded
+        project_dir = view.window().folders()[0]
+        hierarchy_tree = get_hierarchy_tree(project_dir)
 
-        if is_hierarchy_tree_loaded:
+        if hierarchy_tree:
             if symbol:
-                self.show_hierarchy(symbol)
+                self.show_hierarchy(hierarchy_tree, symbol)
             else:
                 print "Symbol None" # FIXME
         else:
             view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__})
 
-    def show_hierarchy(self, symbol):
+    def show_hierarchy(self, hierarchy_tree, symbol):
         try:
-            result = self.hierarchy_function(symbol)
+            result = self.get_hierarchy(hierarchy_tree, symbol)
             view_name = self.view_name + ': ' + symbol
             hierarchy_view = HierarchyView(view_name)
             hierarchy_view.set_content(result)
@@ -142,11 +153,15 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
 class ShowUpwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
-        self.hierarchy_function = class_hierarchy_manager.get_upward_hierarchy
         self.view_name = "Upward Hierarchy"
+
+    def get_hierarchy(self, hierarchy_tree, symbol):
+        return hierarchy_tree.get_upward_hierarchy(symbol)
 
 class ShowDownwardHierarchy(ShowHierarchyBase):
     def __init__(self, args):
         sublime_plugin.TextCommand.__init__(self, args)
-        self.hierarchy_function = class_hierarchy_manager.get_downward_hierarchy
         self.view_name = "Downward Hierarchy"
+
+    def get_hierarchy(self, hierarchy_tree, symbol):
+        return hierarchy_tree.get_downward_hierarchy(symbol)
