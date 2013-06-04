@@ -144,24 +144,27 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
     def show_hierarchy(self, hierarchy_tree, symbol):
         try:
             result = self.get_hierarchy(hierarchy_tree, symbol)
-            view_name = self.view_name + ': ' + symbol
+            view_name = self.prefix + ': ' + symbol
             hierarchy_view = HierarchyView(view_name)
             hierarchy_view.set_content(result)
         except NoSymbolException:
             sublime.status_message("Can't find \"%s\"." % symbol)
 
 class ShowUpwardHierarchy(ShowHierarchyBase):
-    def __init__(self, args):
-        sublime_plugin.TextCommand.__init__(self, args)
-        self.view_name = "Upward Hierarchy"
+    prefix = "Upward Hierarchy: "
 
     def get_hierarchy(self, hierarchy_tree, symbol):
         return hierarchy_tree.get_upward_hierarchy(symbol)
 
 class ShowDownwardHierarchy(ShowHierarchyBase):
-    def __init__(self, args):
-        sublime_plugin.TextCommand.__init__(self, args)
-        self.view_name = "Downward Hierarchy"
+    prefix = "Downward Hierarchy: "
 
     def get_hierarchy(self, hierarchy_tree, symbol):
         return hierarchy_tree.get_downward_hierarchy(symbol)
+
+class ProcessHierarchyTreeSelect(sublime_plugin.TextCommand):
+    @get_symbol
+    def run(self, edit, view, symbol):
+        view_name = view.name()
+        if view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix):
+            print symbol # FIXME
