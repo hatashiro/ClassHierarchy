@@ -39,6 +39,7 @@ class HierarchyView(object):
                 return
         self.view = sublime.active_window().new_file()
         self.view.set_name(self.name)
+        self.view.set_syntax_file('Packages/ClassHierarchy/syntax/ClassHierarchy.tmLanguage')
 
     def fold_files(self, content):
         """

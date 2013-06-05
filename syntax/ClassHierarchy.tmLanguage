@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string></string>
+	</array>
+	<key>name</key>
+	<string>Class Hierarchy View</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>comment</key>
+			<string>Main class name</string>
+			<key>match</key>
+			<string>^([^|^
+^ ]+$)</string>
+			<key>name</key>
+			<string>keyword.main_class_name</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Class name</string>
+			<key>match</key>
+			<string>^ +([^|^
+^ ]+)</string>
+			<key>name</key>
+			<string>support.type.class_name</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>File path</string>
+			<key>match</key>
+			<string> *(|.+)</string>
+			<key>name</key>
+			<string>comment.file_path</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.class_hierarchy_view</string>
+	<key>uuid</key>
+	<string>1ec7226c-638b-43cb-a360-cfec0191709e</string>
+</dict>
+</plist>
