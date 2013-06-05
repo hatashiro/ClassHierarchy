@@ -79,5 +79,6 @@ class HierarchyView(object):
         return sublime.Region(region_from, region_to)
 
     def toggle_class_file_lines(self, row):
-        if not self.view.fold(self.get_file_region(row)):
-            self.view.unfold(self.get_file_region(row))
+        if not self.view.unfold(self.get_file_region(row)):
+            if row in self.file_lines.keys():
+                self.view.fold(self.get_file_region(row))
