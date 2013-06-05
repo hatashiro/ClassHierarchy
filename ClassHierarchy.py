@@ -170,26 +170,28 @@ class ShowDownwardHierarchy(ShowHierarchyBase):
     def get_hierarchy(self, hierarchy_tree, symbol):
         return hierarchy_tree.tree.get_downward_hierarchy(symbol)
 
-class ToggleClassFileLines(sublime_plugin.TextCommand):
+class MouseCommandBase(sublime_plugin.TextCommand):
+    def is_in_hierarchy_view(self):
+        view_name = self.view.name()
+        return (view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix))
+
+    def get_row(self):
+        return self.view.rowcol(self.view.sel()[0].begin())[0]
+
+class ToggleClassFileLines(MouseCommandBase):
     def run(self, edit):
-        view = self.view
-        view_name = view.name()
-        if view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix):
-            project_dir = view.window().folders()[0]
+        if self.is_in_hierarchy_view():
+            current_row = self.get_row()
+
+            project_dir = self.view.window().folders()[0]
             hierarchy_tree = get_hierarchy_tree(project_dir)
-            hierarchy_view = hierarchy_tree.view_pool[view_name]
+            hierarchy_tree.view_pool[self.view.name()].toggle_class_file_lines(current_row)
 
-            current_row = view.rowcol(view.sel()[0].begin())[0]
-            hierarchy_view.toggle_class_file_lines(current_row)
-
-class MoveToFileInHierarchyView(sublime_plugin.TextCommand):
+class MoveToFileInHierarchyView(MouseCommandBase):
     def run(self, edit):
-        view = self.view
-        view_name = view.name()
-        if view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix):
-            project_dir = view.window().folders()[0]
-            hierarchy_tree = get_hierarchy_tree(project_dir)
-            hierarchy_view = hierarchy_tree.view_pool[view_name]
+        if self.is_in_hierarchy_view():
+            current_row = self.get_row()
 
-            current_row = view.rowcol(view.sel()[0].end())[0]
-            hierarchy_view.move_to_file(current_row)
+            project_dir = self.view.window().folders()[0]
+            hierarchy_tree = get_hierarchy_tree(project_dir)
+            hierarchy_tree.view_pool[self.view.name()].move_to_file(current_row)
