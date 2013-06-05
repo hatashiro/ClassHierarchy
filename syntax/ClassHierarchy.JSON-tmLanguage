@@ -1,0 +1,23 @@
+{
+    "name": "Class Hierarchy View",
+    "scopeName": "text.class_hierarchy_view",
+    "fileTypes": [""],
+    "patterns": [
+        {
+            "match": "^([^|^\n^ ]+$)",
+            "name": "keyword.main_class_name",
+            "comment": "Main class name"
+        },
+        {
+            "match": "^ +([^|^\n^ ]+)",
+            "name": "support.type.class_name",
+            "comment": "Class name"
+        },
+        {
+            "match": " *(|.+)",
+            "name": "comment.file_path",
+            "comment": "File path"
+        }
+    ],
+    "uuid": "1ec7226c-638b-43cb-a360-cfec0191709e"
+}
