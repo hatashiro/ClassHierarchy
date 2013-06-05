@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import os
 import sublime
 
 class HierarchyView(object):
@@ -82,3 +83,18 @@ class HierarchyView(object):
         if not self.view.unfold(self.get_file_region(row)):
             if row in self.file_lines.keys():
                 self.view.fold(self.get_file_region(row))
+
+    def move_to_file(self, row):
+        file_path = self.get_file_path_in_row(row)
+        if file_path:
+            window = sublime.active_window()
+            window.open_file(os.path.join(window.folders()[0], file_path))
+
+    def get_file_path_in_row(self, row):
+        for lines in self.file_lines.values():
+            if row in lines:
+                return self.get_text_in_row(row).strip()[1:]
+        return ""
+
+    def get_text_in_row(self, row):
+        return self.view.substr(self.view.line(self.view.text_point(row, 0)))

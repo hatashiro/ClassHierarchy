@@ -181,3 +181,15 @@ class ToggleClassFileLines(sublime_plugin.TextCommand):
 
             current_row = view.rowcol(view.sel()[0].begin())[0]
             hierarchy_view.toggle_class_file_lines(current_row)
+
+class MoveToFileInHierarchyView(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
+        view_name = view.name()
+        if view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix):
+            project_dir = view.window().folders()[0]
+            hierarchy_tree = get_hierarchy_tree(project_dir)
+            hierarchy_view = hierarchy_tree.view_pool[view_name]
+
+            current_row = view.rowcol(view.sel()[0].end())[0]
+            hierarchy_view.move_to_file(current_row)

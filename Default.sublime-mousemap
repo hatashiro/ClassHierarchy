@@ -8,6 +8,6 @@
         "button": "button1", "count": 2,
         "press_command": "drag_select",
         "press_args": {"by": "words"},
-        "command": "move_to_file_in_hierarchy_tree"
+        "command": "move_to_file_in_hierarchy_view"
     }
 ]
