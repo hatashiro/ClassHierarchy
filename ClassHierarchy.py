@@ -16,6 +16,12 @@ is_hierarchy_ctags_in_building = False
 is_hierarchy_tree_in_loading = False
 
 hierarchy_tree_pool = dict()
+
+class HierarchyTree(object):
+    def __init__(self, tree):
+        self.tree = tree
+        self.view_pool = dict()
+
 def get_hierarchy_tree(project_dir):
     try:
         return hierarchy_tree_pool[project_dir]
@@ -23,8 +29,8 @@ def get_hierarchy_tree(project_dir):
         return None
 
 def load_hierarchy_tree(project_dir, ctags_file_path):
-    hierarchy_tree_pool[project_dir] = ClassHierarchyManager()
-    hierarchy_tree_pool[project_dir].parse_tags_file(ctags_file_path)
+    hierarchy_tree_pool[project_dir] = HierarchyTree(ClassHierarchyManager())
+    hierarchy_tree_pool[project_dir].tree.parse_tags_file(ctags_file_path)
 
 def unload_hierarchy_tree(project_dir):
     hierarchy_tree_pool[project_dir] = None
@@ -147,6 +153,8 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
             view_name = self.prefix + ': ' + symbol
             hierarchy_view = HierarchyView(view_name)
             hierarchy_view.set_content(result)
+
+            hierarchy_tree.view_pool[hierarchy_view.name] = hierarchy_view
         except NoSymbolException:
             sublime.status_message("Can't find \"%s\"." % symbol)
 
@@ -154,17 +162,22 @@ class ShowUpwardHierarchy(ShowHierarchyBase):
     prefix = "Upward Hierarchy: "
 
     def get_hierarchy(self, hierarchy_tree, symbol):
-        return hierarchy_tree.get_upward_hierarchy(symbol)
+        return hierarchy_tree.tree.get_upward_hierarchy(symbol)
 
 class ShowDownwardHierarchy(ShowHierarchyBase):
     prefix = "Downward Hierarchy: "
 
     def get_hierarchy(self, hierarchy_tree, symbol):
-        return hierarchy_tree.get_downward_hierarchy(symbol)
+        return hierarchy_tree.tree.get_downward_hierarchy(symbol)
 
-class ProcessHierarchyTreeSelect(sublime_plugin.TextCommand):
-    @get_symbol
-    def run(self, edit, view, symbol):
+class ToggleClassFileLines(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
         view_name = view.name()
         if view_name.startswith(ShowUpwardHierarchy.prefix) or view_name.startswith(ShowDownwardHierarchy.prefix):
-            print symbol # FIXME
+            project_dir = view.window().folders()[0]
+            hierarchy_tree = get_hierarchy_tree(project_dir)
+            hierarchy_view = hierarchy_tree.view_pool[view_name]
+
+            current_row = view.rowcol(view.sel()[0].begin())[0]
+            hierarchy_view.toggle_class_file_lines(current_row)
