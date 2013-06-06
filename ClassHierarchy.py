@@ -6,7 +6,7 @@ import re
 import subprocess
 
 from ClassHierarchyManager import ClassHierarchyManager, set_tab_size, NoSymbolException
-from helpers import get_symbol, to_underscore
+from helpers import hierarchy_base_decorator, to_underscore
 from HierarchyView import HierarchyView
 from settings import setting
 
@@ -106,7 +106,7 @@ class ReloadHierarchyTreeThread(threading.Thread):
         is_hierarchy_tree_in_loading = False
 
 class ReloadHierarchyTree(sublime_plugin.TextCommand):
-    def run(self, edit, caller=None, symbol=None):
+    def run(self, edit, caller=None):
         project_dir = self.view.window().folders()[0]
         ctags_file_path = os.path.join(project_dir, setting('ctags_file'))
 
@@ -126,7 +126,7 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         thread = ReloadHierarchyTreeThread(project_dir, ctags_file_path)
 
         if caller:
-            did_finished = lambda: self.view.run_command(to_underscore(caller), {'symbol': symbol})
+            did_finished = lambda: self.view.run_command(to_underscore(caller['name']), {'symbol': caller['symbol'], 'window': caller['window']})
         else:
             did_finished = lambda: sublime.status_message("Re/Loading hierarchy tree is finished!")
 
@@ -134,8 +134,10 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: check_if_thread_finished(thread, did_finished), 500)
 
 class ShowHierarchyBase(sublime_plugin.TextCommand):
-    @get_symbol
-    def run(self, edit, view, symbol):
+    @hierarchy_base_decorator
+    def run(self, edit, view, symbol, window=None):
+        self.window = window if window else self.view.window()
+
         project_dir = view.window().folders()[0]
         hierarchy_tree = get_hierarchy_tree(project_dir)
 
@@ -145,13 +147,13 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
             else:
                 print "Symbol None" # FIXME
         else:
-            view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__, 'symbol': symbol})
+            view.run_command('reload_hierarchy_tree', {'caller': {'name': self.__class__.__name__, 'symbol': symbol, 'window': self.window}})
 
     def show_hierarchy(self, hierarchy_tree, symbol):
         try:
             result = self.get_hierarchy(hierarchy_tree, symbol)
             view_name = self.prefix + ': ' + symbol
-            hierarchy_view = HierarchyView(view_name)
+            hierarchy_view = HierarchyView(view_name, self.window)
             hierarchy_view.set_content(result)
 
             hierarchy_tree.view_pool[hierarchy_view.name] = hierarchy_view
