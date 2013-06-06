@@ -3,8 +3,10 @@ import os
 import sublime
 
 class HierarchyView(object):
-    def __init__(self, name):
+    def __init__(self, name, window=None):
         self.name = name
+        self.window = window if window else sublime.active_window()
+
         self.file_lines = dict()
         self.set_view()
 
@@ -31,14 +33,13 @@ class HierarchyView(object):
         self.view.set_read_only(True)
 
     def set_view(self):
-        window = sublime.active_window()
-        for view in window.views():
+        for view in self.window.views():
             if view.name() == self.name:
                 self.view = view
                 self.empty_view()
-                window.focus_view(self.view)
+                self.window.focus_view(self.view)
                 return
-        self.view = sublime.active_window().new_file()
+        self.view = self.window.new_file()
         self.view.set_name(self.name)
         self.view.set_syntax_file('Packages/ClassHierarchy/syntax/ClassHierarchy.tmLanguage')
 
