@@ -8,10 +8,12 @@ def get_symbol(f):
         view = self.view
 
         if not args.get('no_symbol'):
-            region = view.sel()[0]
-            if region.begin() == region.end():
-                region = view.word(region)
-            symbol = view.substr(region)
+            symbol = args.get('symbol')
+            if not symbol:
+                region = view.sel()[0]
+                if region.begin() == region.end():
+                    region = view.word(region)
+                symbol = view.substr(region)
         else:
             symbol = None
 

@@ -106,7 +106,7 @@ class ReloadHierarchyTreeThread(threading.Thread):
         is_hierarchy_tree_in_loading = False
 
 class ReloadHierarchyTree(sublime_plugin.TextCommand):
-    def run(self, edit, caller=None):
+    def run(self, edit, caller=None, symbol=None):
         project_dir = self.view.window().folders()[0]
         ctags_file_path = os.path.join(project_dir, setting('ctags_file'))
 
@@ -126,7 +126,7 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         thread = ReloadHierarchyTreeThread(project_dir, ctags_file_path)
 
         if caller:
-            did_finished = lambda: self.view.run_command(to_underscore(caller))
+            did_finished = lambda: self.view.run_command(to_underscore(caller), {'symbol': symbol})
         else:
             did_finished = lambda: sublime.status_message("Re/Loading hierarchy tree is finished!")
 
@@ -145,7 +145,7 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
             else:
                 print "Symbol None" # FIXME
         else:
-            view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__})
+            view.run_command('reload_hierarchy_tree', {'caller': self.__class__.__name__, 'symbol': symbol})
 
     def show_hierarchy(self, hierarchy_tree, symbol):
         try:
