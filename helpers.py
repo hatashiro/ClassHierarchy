@@ -2,7 +2,7 @@
 import re
 from functools import wraps
 
-def get_symbol(f):
+def hierarchy_base_decorator(f):
     @wraps(f)
     def wrapper(self, edit, **args):
         view = self.view
@@ -17,7 +17,11 @@ def get_symbol(f):
         else:
             symbol = None
 
-        return f(self, edit, view, symbol)
+        window = args.get('window')
+        if not window:
+            window = None
+
+        return f(self, edit, view, symbol, window)
     return wrapper
 
 def to_underscore(camelcase):
