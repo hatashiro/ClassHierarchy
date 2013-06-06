@@ -89,7 +89,15 @@ class HierarchyView(object):
         file_path = self.get_file_path_in_row(row)
         if file_path:
             window = sublime.active_window()
-            window.open_file(os.path.join(window.folders()[0], file_path))
+            class_view = window.open_file(os.path.join(window.folders()[0], file_path))
+
+            self.highlight_class_name(class_view, self.get_class_name_for_row(row))
+
+    def get_class_name_for_row(self, row):
+        for class_line, file_lines in self.file_lines.iteritems():
+            if row == class_line or row in file_lines:
+                return self.get_text_in_row(class_line).strip()
+        return None
 
     def get_file_path_in_row(self, row):
         for lines in self.file_lines.values():
@@ -99,3 +107,25 @@ class HierarchyView(object):
 
     def get_text_in_row(self, row):
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
+
+    def highlight_class_name(self, view, class_name):
+        def load_finished():
+            class_regex = ".*class\s+(%s)[^a-zA-z0-9_]\s*[:]?([^{]+)\{" % class_name # FIXME: C++ only
+            class_region = view.find(class_regex, 0)
+
+            if class_region:
+                # Focus and highlight the class
+                view.show(class_region)
+                view.add_regions("class_hierarchy_class_found", [class_region], 'source', 'dot', sublime.DRAW_OUTLINED)
+
+                # Unhighlight after 5 seconds.
+                sublime.set_timeout(lambda: view.erase_regions("class_hierarchy_class_found"), 5000)
+
+        def check_if_loaded():
+            if view.is_loading():
+                sublime.set_timeout(lambda: check_if_loaded(), 100)
+            else:
+                load_finished();
+
+        # Wait until the view is loaded
+        sublime.set_timeout(lambda: check_if_loaded(), 100)
