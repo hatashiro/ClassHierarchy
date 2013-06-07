@@ -126,7 +126,10 @@ class ReloadHierarchyTree(sublime_plugin.TextCommand):
         thread = ReloadHierarchyTreeThread(project_dir, ctags_file_path)
 
         if caller:
-            did_finished = lambda: self.view.run_command(to_underscore(caller['name']), {'symbol': caller['symbol'], 'window': caller['window']})
+            if caller['symbol']:
+                did_finished = lambda: self.view.run_command(to_underscore(caller['name']), {'symbol': caller['symbol'], 'window': caller['window']})
+            else:
+                did_finished = lambda: self.view.run_command(to_underscore(caller['name']), {'no_symbol': True, 'window': caller['window']})
         else:
             did_finished = lambda: sublime.status_message("Re/Loading hierarchy tree is finished!")
 
