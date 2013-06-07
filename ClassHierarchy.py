@@ -145,7 +145,7 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
             if symbol:
                 self.show_hierarchy(hierarchy_tree, symbol)
             else:
-                print "Symbol None" # FIXME
+                self.show_class_panel(hierarchy_tree)
         else:
             view.run_command('reload_hierarchy_tree', {'caller': {'name': self.__class__.__name__, 'symbol': symbol, 'window': self.window}})
 
@@ -159,6 +159,19 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
             hierarchy_tree.view_pool[hierarchy_view.name] = hierarchy_view
         except NoSymbolException:
             sublime.status_message("Can't find \"%s\"." % symbol)
+            self.show_class_panel(hierarchy_tree)
+
+    def show_class_panel(self, hierarchy_tree):
+        class_panel_list = []
+        for class_object in hierarchy_tree.tree.class_pool.values():
+            if self.class_filter(class_object):
+                class_panel_list.append([class_object.name])
+
+        def selected(index):
+            symbol = class_panel_list[index][0]
+            self.view.run_command(to_underscore(self.__class__.__name__), {'symbol': symbol, 'window': self.window})
+
+        self.window.show_quick_panel(class_panel_list, selected)
 
 class ShowUpwardHierarchy(ShowHierarchyBase):
     prefix = "Upward Hierarchy: "
@@ -166,11 +179,17 @@ class ShowUpwardHierarchy(ShowHierarchyBase):
     def get_hierarchy(self, hierarchy_tree, symbol):
         return hierarchy_tree.tree.get_upward_hierarchy(symbol)
 
+    def class_filter(self, class_object):
+        return (len(class_object.parents) > 0)
+
 class ShowDownwardHierarchy(ShowHierarchyBase):
     prefix = "Downward Hierarchy: "
 
     def get_hierarchy(self, hierarchy_tree, symbol):
         return hierarchy_tree.tree.get_downward_hierarchy(symbol)
+
+    def class_filter(self, class_object):
+        return (len(class_object.childs) > 0)
 
 class MouseCommandBase(sublime_plugin.TextCommand):
     def is_in_hierarchy_view(self):
