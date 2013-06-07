@@ -71,6 +71,9 @@ class HierarchyView(object):
                     file_lines = lines
                     break
 
+        if len(file_lines) == 0:
+            return None
+
         region_from = self.view.text_point(min(file_lines), 0) - 1
         region_to = self.view.text_point(max(file_lines) + 1, 0) - 1
 
@@ -81,9 +84,11 @@ class HierarchyView(object):
         return sublime.Region(region_from, region_to)
 
     def toggle_class_file_lines(self, row):
-        if not self.view.unfold(self.get_file_region(row)):
-            if row in self.file_lines.keys():
-                self.view.fold(self.get_file_region(row))
+        file_region = self.get_file_region(row)
+        if file_region:
+            if not self.view.unfold(file_region):
+                if row in self.file_lines.keys():
+                    self.view.fold(file_region)
 
     def move_to_file(self, row):
         file_path = self.get_file_path_in_row(row)
