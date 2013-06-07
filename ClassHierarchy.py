@@ -146,7 +146,10 @@ class ShowHierarchyBase(sublime_plugin.TextCommand):
 
         if hierarchy_tree:
             if symbol:
-                self.show_hierarchy(hierarchy_tree, symbol)
+                if self.class_filter(hierarchy_tree.tree.get_class(symbol)):
+                    self.show_hierarchy(hierarchy_tree, symbol)
+                else:
+                    sublime.status_message("There's no hierarchy to show for the '%s'" % symbol)
             else:
                 self.show_class_panel(hierarchy_tree)
         else:
