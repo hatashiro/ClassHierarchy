@@ -1,0 +1,26 @@
+{
+    "schema_version": "1.2",
+    "packages": [
+        {
+            "name": "ClassHierarchy",
+            "description": "Class Hierarchy with CTags for Sublime Text 2",
+            "author": "noraesae",
+            "homepage": "https://github.com/noraesae/ClassHierarchy",
+            "last_modified": "2013-06-09 09:46:17",
+            "platforms": {
+                "osx": [
+                    {
+                        "version": "0.1.0",
+                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.0"
+                    }
+                ],
+                "linux": [
+                    {
+                        "version": "0.1.0",
+                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.0"
+                    }
+                ]
+            }
+        }
+    ]
+}
