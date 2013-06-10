@@ -115,7 +115,7 @@ class HierarchyView(object):
 
     def highlight_class_name(self, view, class_name):
         def load_finished():
-            class_regex = ".*class\s+(%s)[^a-zA-z0-9_]\s*[:]?([^{]+)\{" % class_name # FIXME: C++ only
+            class_regex = ".*class\s+(%s)[^a-zA-z0-9_]\s*[:]?([^{]+)*\{" % class_name # FIXME: C++ only
             class_region = view.find(class_regex, 0)
 
             if class_region:
