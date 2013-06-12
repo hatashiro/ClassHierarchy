@@ -6,18 +6,18 @@
             "description": "Class Hierarchy with CTags for Sublime Text 2",
             "author": "noraesae",
             "homepage": "https://github.com/noraesae/ClassHierarchy",
-            "last_modified": "2013-06-10 01:52:06",
+            "last_modified": "2013-06-12 07:24:34",
             "platforms": {
                 "osx": [
                     {
-                        "version": "0.1.1",
-                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.1"
+                        "version": "0.1.2",
+                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.2"
                     }
                 ],
                 "linux": [
                     {
-                        "version": "0.1.1",
-                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.1"
+                        "version": "0.1.2",
+                        "url": "https://nodeload.github.com/noraesae/ClassHierarchy/zip/0.1.2"
                     }
                 ]
             }
