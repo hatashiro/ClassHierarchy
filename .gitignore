@@ -1,2 +1,3 @@
 .tags-class-hierarchy
 *.pyc
+*.tmLanguage.cache
