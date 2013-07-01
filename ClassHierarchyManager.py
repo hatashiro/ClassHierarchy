@@ -76,8 +76,12 @@ class ClassHierarchyManager(object):
                     parents = inherits[9:].split(',')
                     for parent in parents:
                         if "::" in parent:
-                            parent = parent.split("::")[-1]
-                        cls.inherits(self.get_class(parent))
+                            parent_with_namespace = parent
+                            parent = parent_with_namespace.split("::")[-1]
+                            if class_name == parent:
+                                parent = parent_with_namespace
+                        if class_name != parent:
+                            cls.inherits(self.get_class(parent))
 
     def get_upward_hierarchy(self, symbol):
         try:
